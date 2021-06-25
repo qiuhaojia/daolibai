@@ -31,3 +31,4 @@
 ..\obj\control.o: ..\STM32F10x_FWLib\inc\stm32f10x_wwdg.h
 ..\obj\control.o: ..\STM32F10x_FWLib\inc\misc.h
 ..\obj\control.o: ..\HARDWARE\TIMER\timer.h
+..\obj\control.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\math.h

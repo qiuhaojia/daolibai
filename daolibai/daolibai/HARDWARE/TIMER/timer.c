@@ -3,11 +3,13 @@
 #include	"delay.h"  
 #include "Send_Data.h"
 #include "control.h"
+#include "adc.h"
 #include <stdlib.h>
 #define ENCODER_TIM_PERIOD (u16)(65535)   //不可大于65535 因为F103的定时器是16位的。
 
 int read_encode = 0;
 int read_encode_motor = 0;
+int times_flag = 0;
 
 //设置NVIC分组
 //NVIC_Group:NVIC分组 0~4 总共5组 
@@ -48,7 +50,7 @@ void TIM1_Int_Init(void)
 
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE); //时钟使能
 
-	TIM_TimeBaseStructure.TIM_Period = 499; //设置在下一个更新事件装入活动的自动重装载寄存器周期的值	 计数到500为50ms
+	TIM_TimeBaseStructure.TIM_Period = 99; //设置在下一个更新事件装入活动的自动重装载寄存器周期的值	 计数到100为10ms
 	TIM_TimeBaseStructure.TIM_Prescaler =7199; //设置用来作为TIMx时钟频率除数的预分频值  10Khz的计数频率  
 	TIM_TimeBaseStructure.TIM_ClockDivision = 0; //设置时钟分割:TDTS = Tck_tim
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;  //TIM向上计数模式
@@ -76,16 +78,33 @@ void TIM1_UP_IRQHandler(void)   //TIM3中断
 		{
 //		    Read_Encoder(2); 	//左前
 //				Read_Encoder(3);	//右前
-			read_encode = Read_Encoder(4);	//左后
+			  read_encode = Read_Angle_Encoder(5);	//位置式
+//			read_encode_motor=Read_Encoder(5);  //===读取编码器的值//右后
+	
+			if(times_flag == 5)
+			{
+				////电机相关				
+				Position_PWM =  Position_PID(read_encode,Position_Zero);
+				Send_Speed2(read_encode, Position_Zero,adc_value, ZHONGZHI);
+				Xianfu_Pwm(3000);
+				Set_Pwm(Position_PWM);
+				times_flag = 0;
+			}
+			times_flag++;
+//角位移传感器相关		
+			adc_value = Get_Adc_Average(13,8); 
+			Balance_PWM = balance(adc_value);
+			Xianfu_Pwm(3000);
+			Set_Pwm(Balance_PWM);		
 			
-			read_encode_motor=Read_Encoder(5);  //===读取编码器的值//右后
-			Position_D+=Encoder_D;      //===积分得到速度   
-			//Motor_D=Incremental_PI_D(Encoder_D,Target_D);  //===速度闭环控制计算电机C最终PWM
 			
-		
+////最终PWM			
+			Motor_D = -Position_PWM +Balance_PWM;
+			Xianfu_Pwm(3000);
+			Set_Pwm(Motor_D);
 			
-			
-			TIM_ClearITPendingBit(TIM1, TIM_IT_Update  );  //清除TIMx的中断待处理位:TIM 中断源 
+				TIM_ClearITPendingBit(TIM1, TIM_IT_Update);  //清除TIMx的中断待处理位:TIM 中断源 
+
 		}
 }
 //定时器2的编码模式初始化
@@ -247,7 +266,7 @@ void	Encode_int_tim5(void)
 }
 
 
-//读取编码器值
+//读取电机编码器值
 int Read_Encoder(int TIMX)
 {
 	s32 Encoder_TIM;    
@@ -262,6 +281,20 @@ int Read_Encoder(int TIMX)
 	return Encoder_TIM;
 }
 
+//读取角位移编码器值
+int Read_Angle_Encoder(int TIMX)
+{
+	s32 Encoder_TIM;    
+	switch(TIMX)
+	{
+		case 2:  Encoder_TIM= (short)TIM2 -> CNT;  break;//左前
+		case 3:  Encoder_TIM= (short)TIM3 -> CNT;  break;//右前	
+		case 4:  Encoder_TIM= (short)TIM4 -> CNT;  break;//左后	
+		case 5:  Encoder_TIM= (short)TIM5 -> CNT;  break;//右后	
+		default:  Encoder_TIM=0;
+	}
+	return Encoder_TIM;
+}
 //中断函数
 void TIM2_IRQHandler(void)
 {                                   

@@ -70,10 +70,15 @@ void INTX_DISABLE(void);//关闭所有中断
 void INTX_ENABLE(void);	//开启所有中断
 void MSR_MSP(u32 addr);	//设置堆栈地址
 
-extern int Encoder_A,Encoder_B,Encoder_C,Encoder_D; 
-extern long int Position_A,Position_B,Position_C,Position_D,Rate_A,Rate_B,Rate_C,Rate_D; //PID控制相关变量  
-extern long int Target_A,Target_B,Target_C,Target_D; //电机目标值
-extern long int Motor_A,Motor_B,Motor_C,Motor_D; //电机PWM变量
 extern float Velocity_KP,Velocity_KI;	          //速度控制PID参数
+extern int Encoder_A,Encoder_B,Encoder_C,Encoder_D; 
+extern long int Position_A,Position_B,Position_C,Position_D,Rate_A,Rate_B,Rate_C,Rate_D; //PID控制相关变量 
+extern long int Target_A,Target_B,Target_C,Target_D; //电机目标值 
+extern long int Motor_A,Motor_B,Motor_C,Motor_D; //电机PWM变量
+extern float Position_KP,Position_KI,Position_KD;	//位置控制PID
+extern long int Position_PWM,Balance_PWM; //电机PWM变量
+extern u16 adc_value;
+
+extern float Balance_KP,Balance_KD;
 
 #endif

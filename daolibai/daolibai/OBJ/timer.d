@@ -33,4 +33,5 @@
 ..\obj\timer.o: ..\SYSTEM\delay\delay.h
 ..\obj\timer.o: ..\HARDWARE\Send_Data\Send_Data.h
 ..\obj\timer.o: ..\HARDWARE\CONTROL\control.h
+..\obj\timer.o: ..\HARDWARE\ADC\adc.h
 ..\obj\timer.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h

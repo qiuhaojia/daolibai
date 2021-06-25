@@ -18,6 +18,7 @@
 
 
 int Read_Encoder(int TIMX);
+int Read_Angle_Encoder(int TIMX);
 void 	TIM1_Int_Init(void);
 void	Encode_int_tim2(void);
 void	Encode_int_tim3(void);
